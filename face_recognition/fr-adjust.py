@@ -10,21 +10,23 @@ known_encodings = []
 known_names = []
 
 # 1. Load semua wajah dari folder
-for filename in os.listdir(KNOWN_FACES_DIR):
-    if filename.endswith((".jpg", ".png", ".jpeg")):
-        path = os.path.join(KNOWN_FACES_DIR, filename)
-        name = os.path.splitext(filename)[0]  # nama file jadi label
+for person_name in os.listdir(KNOWN_FACES_DIR):
+    person_folder = os.path.join(KNOWN_FACES_DIR, person_name)
+    if not os.path.isdir(person_folder):
+        continue  # skip kalau bukan folder
 
-        image = face_recognition.load_image_file(path)
-        encodings = face_recognition.face_encodings(image)
+    for filename in os.listdir(person_folder):
+        if filename.endswith((".jpg", ".png", ".jpeg")):
+            path = os.path.join(person_folder, filename)
 
-        if len(encodings) > 0:
-            known_encodings.append(encodings[0])
-            known_names.append(name)
-        else:
-            print(f"[WARN] Tidak ada wajah terdeteksi di {filename}")
+            image = face_recognition.load_image_file(path)
+            encodings = face_recognition.face_encodings(image)
 
-print(f"✅ Loaded {len(known_encodings)} known faces")
+            for encoding in encodings:
+                known_encodings.append(encoding)
+                known_names.append(person_name)
+
+print(f"✅ Loaded {len(known_encodings)} total encodings dari {len(set(known_names))} orang")
 
 # 2. Buka webcam
 cap = cv2.VideoCapture(0)
@@ -52,7 +54,7 @@ while True:
         best_match_index = face_distances.argmin() if len(face_distances) > 0 else None
 
         if best_match_index is not None and matches[best_match_index]:
-            name = f"Registered - {known_names[best_match_index]}"
+            name = f"Registered: {known_names[best_match_index]}"
             color = (0, 255, 0)  # hijau untuk known face
 
         # 6. Gambar kotak & nama
