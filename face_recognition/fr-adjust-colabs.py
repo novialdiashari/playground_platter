@@ -5,6 +5,7 @@ import numpy as np
 
 # Folder berisi foto orang yang dikenal
 KNOWN_FACES_DIR = r"D:\P3 Work\playground_platter\face_recognition\known-faces"
+KNOWN_FACES_DIR= r"/content/playground_platter/face_recognition/known-faces"
 
 known_encodings = []
 known_names = []
@@ -29,8 +30,9 @@ for person_name in os.listdir(KNOWN_FACES_DIR):
 print(f"✅ Loaded {len(known_encodings)} total encodings dari {len(set(known_names))} orang")
 
 # 2. Buka webcam
-# video_path = r"D:\P3 Work\playground_platter\face_recognition\sources\video6.mp4"
-video_path = 0
+video_path = r"D:\P3 Work\playground_platter\face_recognition\sources\video6.mp4"
+video_path = r"/content/playground_platter/face_recognition/source/video6.mp4"
+# video_path = 0
 cap = cv2.VideoCapture(video_path)
 # cap = cv2.VideoCapture(2)
 frame_count = 0
