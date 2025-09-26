@@ -16,7 +16,7 @@ for person_name in os.listdir(KNOWN_FACES_DIR):
         continue  # skip kalau bukan folder
 
     for filename in os.listdir(person_folder):
-        if filename.endswith((".jpg", ".png", ".jpeg")):
+        if filename.endswith((".jpg", ".png", ".jpeg", ".JPG")):
             path = os.path.join(person_folder, filename)
 
             image = face_recognition.load_image_file(path)
@@ -29,19 +29,31 @@ for person_name in os.listdir(KNOWN_FACES_DIR):
 print(f"✅ Loaded {len(known_encodings)} total encodings dari {len(set(known_names))} orang")
 
 # 2. Buka webcam
-cap = cv2.VideoCapture(0)
+video_path = r"D:\P3 Work\playground_platter\face_recognition\sources\video6.mp4"
+cap = cv2.VideoCapture(video_path)
+# cap = cv2.VideoCapture(2)
+frame_count = 0
+process_every = 2 
 
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
+    frame_count += 1
+    if frame_count % process_every != 0:
+        cv2.imshow("Multi-Face Recognition", frame)
+        continue
+
+    small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
     # Ubah ke RGB
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
     # 3. Deteksi wajah
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+    face_locations = [(top*2, right*2, bottom*2, left*2) for (top, right, bottom, left) in face_locations]
 
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         # 4. Bandingkan dengan semua wajah yang dikenal
@@ -54,7 +66,8 @@ while True:
         best_match_index = face_distances.argmin() if len(face_distances) > 0 else None
 
         if best_match_index is not None and matches[best_match_index]:
-            name = f"Registered: {known_names[best_match_index]}"
+            confidence = round((1 - face_distances[best_match_index]) * 100, 2)
+            name = f"{known_names[best_match_index]} ({confidence}%)"
             color = (0, 255, 0)  # hijau untuk known face
 
         # 6. Gambar kotak & nama
